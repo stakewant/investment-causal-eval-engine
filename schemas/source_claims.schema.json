@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/source_claims.schema.json",
+  "title": "Temporal Source Claims",
+  "type": "object",
+  "required": ["source_policy_version", "claims"],
+  "additionalProperties": false,
+  "properties": {
+    "source_policy_version": {"type": "string", "minLength": 1},
+    "claims": {
+      "type": "array",
+      "items": {"$ref": "#/$defs/claim"}
+    }
+  },
+  "$defs": {
+    "reviewer": {
+      "type": "object",
+      "required": ["reviewer_id", "reviewed_at"],
+      "additionalProperties": false,
+      "properties": {
+        "reviewer_id": {"type": "string", "minLength": 1},
+        "reviewed_at": {"type": "string", "format": "date-time"}
+      }
+    },
+    "priorKnowledge": {
+      "type": "object",
+      "required": ["status", "policy_rule_id", "justification_text", "reviewers"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {"const": "APPROVED"},
+        "policy_rule_id": {"type": "string", "minLength": 1},
+        "justification_text": {"type": "string", "minLength": 1},
+        "reviewers": {
+          "type": "array",
+          "minItems": 2,
+          "items": {"$ref": "#/$defs/reviewer"}
+        }
+      }
+    },
+    "claim": {
+      "type": "object",
+      "required": [
+        "claim_id",
+        "source_id",
+        "source_type",
+        "source_url",
+        "text",
+        "evidence_span",
+        "published_at",
+        "available_at",
+        "knowledge_role",
+        "public_status",
+        "visibility_status",
+        "scoring_eligibility",
+        "allowed_uses"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "claim_id": {"type": "string", "minLength": 1},
+        "source_id": {"type": "string", "minLength": 1},
+        "source_type": {
+          "enum": ["NEWS", "FILING", "ANALYST_REPORT", "MARKET_DATA", "RESEARCH", "OUTCOME", "FIXTURE"]
+        },
+        "source_url": {"type": "string", "minLength": 1},
+        "text": {"type": "string", "minLength": 1},
+        "evidence_span": {"type": "string", "minLength": 1},
+        "published_at": {"type": "string", "format": "date-time"},
+        "available_at": {"type": "string", "format": "date-time"},
+        "valid_from": {"type": ["string", "null"], "format": "date-time"},
+        "valid_to": {"type": ["string", "null"], "format": "date-time"},
+        "knowledge_role": {
+          "enum": ["AS_OF_EVIDENCE", "RETROSPECTIVE_ANALYSIS", "OUTCOME_EVIDENCE"]
+        },
+        "public_status": {"enum": ["PUBLIC_AS_OF", "NOT_PUBLIC_AS_OF", "UNKNOWN"]},
+        "visibility_status": {"enum": ["VISIBLE_TO_USER", "NOT_VISIBLE_TO_USER"]},
+        "scoring_eligibility": {
+          "enum": ["MANDATORY_ELIGIBLE", "OPTIONAL_ELIGIBLE", "FEEDBACK_ONLY", "INELIGIBLE"]
+        },
+        "allowed_uses": {
+          "type": "array",
+          "items": {
+            "enum": ["USER_INPUT", "SCORING", "GRAPH_AUTHORING", "POST_TURN_FEEDBACK", "FINAL_REVIEW"]
+          }
+        },
+        "prior_knowledge": {"$ref": "#/$defs/priorKnowledge"}
+      }
+    }
+  }
+}
+

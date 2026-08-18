@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/evaluator_bundle.schema.json",
+  "title": "Immutable Evaluator Bundle",
+  "type": "object",
+  "required": ["evaluator_bundle_id", "bundle_hash", "members"],
+  "additionalProperties": false,
+  "properties": {
+    "evaluator_bundle_id": {"type": "string", "minLength": 1},
+    "bundle_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "members": {
+      "type": "object",
+      "required": [
+        "m6_policy_version",
+        "source_policy_version",
+        "factor_catalog_version",
+        "graph_schema_version",
+        "graph_version",
+        "graph_compile_hash",
+        "extractor_version",
+        "relation_extractor_version",
+        "validator_version"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "m6_policy_version": {"type": "string", "minLength": 1},
+        "source_policy_version": {"type": "string", "minLength": 1},
+        "factor_catalog_version": {"type": "string", "minLength": 1},
+        "graph_schema_version": {"type": "string", "minLength": 1},
+        "graph_version": {"type": "string", "minLength": 1},
+        "graph_compile_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+        "extractor_version": {"type": "string", "minLength": 1},
+        "relation_extractor_version": {"type": "string", "minLength": 1},
+        "graph_ranker_version": {"type": ["string", "null"]},
+        "validator_version": {"type": "string", "minLength": 1},
+        "llm_parser_version": {"type": ["string", "null"]}
+      }
+    }
+  }
+}
+

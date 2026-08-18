@@ -1,0 +1,157 @@
+{
+  "schema_version": "causal-factor-graph-v1.1",
+  "scenario_id": "semiconductor-fixture",
+  "scenario_version": 1,
+  "turn_no": 2,
+  "information_cutoff_at": "2024-02-22T23:59:59+09:00",
+  "learning_focus": ["INDUSTRY_TO_STOCK_CAUSALITY", "DIRECT_INDIRECT_BALANCE"],
+  "rationale_prompt": "산업 영향과 선택한 종목의 실제 노출을 연결해 설명하세요.",
+  "source_policy_version": "temporal-source-v1.1",
+  "graph_version": "semiconductor-fixture-turn2-graph-v1",
+  "fixture_only": true,
+  "nodes": [
+    {
+      "node_id": "N-AI-CAPEX",
+      "factor_id": "AI_CAPEX_GROWTH",
+      "scope": "MARKET",
+      "entity_ids": ["AI_INFRASTRUCTURE"],
+      "expected_direction": "POSITIVE",
+      "importance": "REQUIRED",
+      "available_from_turn": 2,
+      "horizon": "MEDIUM",
+      "source_claim_refs": ["CLM-FIX-AI-CAPEX"],
+      "scoring_eligibility": "MANDATORY_ELIGIBLE",
+      "as_of_justification_ref": null
+    },
+    {
+      "node_id": "N-HBM-DEMAND",
+      "factor_id": "HBM_DEMAND_GROWTH",
+      "scope": "INDUSTRY",
+      "entity_ids": ["SEMICONDUCTOR", "HBM"],
+      "expected_direction": "POSITIVE",
+      "importance": "REQUIRED",
+      "available_from_turn": 2,
+      "horizon": "MEDIUM",
+      "source_claim_refs": ["CLM-FIX-HBM-DEMAND"],
+      "scoring_eligibility": "MANDATORY_ELIGIBLE",
+      "as_of_justification_ref": null
+    },
+    {
+      "node_id": "N-TARGET-HBM-EXPOSURE",
+      "factor_id": "TARGET_HBM_PRODUCT_EXPOSURE",
+      "scope": "STOCK",
+      "entity_ids": ["000660"],
+      "expected_direction": "POSITIVE",
+      "importance": "REQUIRED",
+      "available_from_turn": 2,
+      "horizon": "MEDIUM",
+      "source_claim_refs": ["CLM-FIX-TARGET-EXPOSURE"],
+      "scoring_eligibility": "MANDATORY_ELIGIBLE",
+      "as_of_justification_ref": null
+    },
+    {
+      "node_id": "N-TARGET-EARNINGS",
+      "factor_id": "TARGET_EARNINGS_EXPECTATION",
+      "scope": "STOCK",
+      "entity_ids": ["000660"],
+      "expected_direction": "POSITIVE",
+      "importance": "REQUIRED",
+      "available_from_turn": 2,
+      "horizon": "MEDIUM",
+      "source_claim_refs": ["CLM-FIX-EARNINGS"],
+      "scoring_eligibility": "MANDATORY_ELIGIBLE",
+      "as_of_justification_ref": null
+    }
+  ],
+  "edges": [
+    {
+      "edge_id": "E-AI-TO-HBM",
+      "from_node": "N-AI-CAPEX",
+      "to_node": "N-HBM-DEMAND",
+      "relation": "INCREASES",
+      "sign": "POSITIVE",
+      "strength": "MEDIUM",
+      "lag": "MEDIUM",
+      "importance": "REQUIRED",
+      "conditions": [],
+      "valid_from": "2024-02-20T10:00:00+09:00",
+      "valid_to": null,
+      "evidence_available_at": "2024-02-20T10:00:00+09:00",
+      "source_claim_refs": ["CLM-FIX-HBM-DEMAND"],
+      "temporal_status": "PUBLIC_AS_OF",
+      "scoring_eligibility": "MANDATORY_ELIGIBLE",
+      "as_of_justification_ref": null
+    },
+    {
+      "edge_id": "E-HBM-TO-TARGET-EXPOSURE",
+      "from_node": "N-HBM-DEMAND",
+      "to_node": "N-TARGET-HBM-EXPOSURE",
+      "relation": "EXPOSES",
+      "sign": "POSITIVE",
+      "strength": "STRONG",
+      "lag": "SHORT",
+      "importance": "REQUIRED",
+      "conditions": [],
+      "valid_from": "2024-02-21T09:00:00+09:00",
+      "valid_to": null,
+      "evidence_available_at": "2024-02-21T09:00:00+09:00",
+      "source_claim_refs": ["CLM-FIX-TARGET-EXPOSURE"],
+      "temporal_status": "PUBLIC_AS_OF",
+      "scoring_eligibility": "MANDATORY_ELIGIBLE",
+      "as_of_justification_ref": null
+    },
+    {
+      "edge_id": "E-EXPOSURE-TO-EARNINGS",
+      "from_node": "N-TARGET-HBM-EXPOSURE",
+      "to_node": "N-TARGET-EARNINGS",
+      "relation": "INCREASES",
+      "sign": "POSITIVE",
+      "strength": "CONDITIONAL",
+      "lag": "MEDIUM",
+      "importance": "REQUIRED",
+      "conditions": ["수요 증가가 실제 출하와 가격에 반영될 것"],
+      "valid_from": "2024-02-21T10:00:00+09:00",
+      "valid_to": null,
+      "evidence_available_at": "2024-02-21T10:00:00+09:00",
+      "source_claim_refs": ["CLM-FIX-EARNINGS"],
+      "temporal_status": "PUBLIC_AS_OF",
+      "scoring_eligibility": "MANDATORY_ELIGIBLE",
+      "as_of_justification_ref": null
+    }
+  ],
+  "paths": [
+    {
+      "path_id": "AI-TO-TARGET-EARNINGS",
+      "label": "AI 투자에서 대상 반도체 기업 실적 기대까지",
+      "path_class": "INDIRECT",
+      "source_scope": "MARKET",
+      "target_scope": "STOCK",
+      "target_entity_ids": ["000660"],
+      "path_nodes": [
+        {"sequence": 1, "node_id": "N-AI-CAPEX", "path_node_role": "TRIGGER", "segment_id": "TRIGGER"},
+        {"sequence": 2, "node_id": "N-HBM-DEMAND", "path_node_role": "CAUSAL_MEDIATOR", "segment_id": "INDUSTRY_TRANSMISSION"},
+        {"sequence": 3, "node_id": "N-TARGET-HBM-EXPOSURE", "path_node_role": "DIRECT_EXPOSURE", "segment_id": "TARGET_EXPOSURE"},
+        {"sequence": 4, "node_id": "N-TARGET-EARNINGS", "path_node_role": "TARGET_OUTCOME", "segment_id": "TARGET_OUTCOME"}
+      ],
+      "edge_ids": ["E-AI-TO-HBM", "E-HBM-TO-TARGET-EXPOSURE", "E-EXPOSURE-TO-EARNINGS"],
+      "required_semantic_segments": [
+        {"segment_id": "TRIGGER", "one_of_node_ids": ["N-AI-CAPEX"]},
+        {"segment_id": "INDUSTRY_TRANSMISSION", "one_of_node_ids": ["N-HBM-DEMAND"]},
+        {"segment_id": "TARGET_EXPOSURE", "one_of_node_ids": ["N-TARGET-HBM-EXPOSURE"]},
+        {"segment_id": "TARGET_OUTCOME", "one_of_node_ids": ["N-TARGET-EARNINGS"]}
+      ],
+      "alternative_group_id": null,
+      "importance": "REQUIRED",
+      "applicability": "APPLICABLE",
+      "feedback_release": "POST_TURN_AS_OF"
+    }
+  ],
+  "complexity_profile": {
+    "required_segment_count": 4,
+    "optional_mediator_count": 0,
+    "difficulty_band": "INTERMEDIATE",
+    "author_review_status": "DRAFT"
+  }
+}
+
+

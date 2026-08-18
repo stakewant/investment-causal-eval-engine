@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/m6_result.schema.json",
+  "title": "M6 Shadow Result",
+  "type": "object",
+  "required": ["m6_policy_version", "status", "evaluation_mode", "legacy_score_effect"],
+  "additionalProperties": false,
+  "properties": {
+    "m6_policy_version": {"const": "m6-scoring-v1.1"},
+    "status": {"enum": ["SCORED", "NOT_ASSESSED", "NOT_APPLICABLE"]},
+    "evaluation_mode": {"const": "SHADOW"},
+    "legacy_score_effect": {"const": 0},
+    "components": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "target_exposure_reasoning": {"$ref": "#/$defs/component"},
+        "causal_transmission_reasoning": {"$ref": "#/$defs/component"}
+      }
+    },
+    "industry_context_diagnostic": {"type": "object"},
+    "industry_to_stock_link": {"enum": ["VALID", "WEAK", "INVALID", "MISSING"]},
+    "base_m6": {"type": "number", "minimum": 1, "maximum": 5},
+    "caps_applied": {"type": "array", "items": {"$ref": "#/$defs/cap"}},
+    "final_m6": {"type": "number", "minimum": 1, "maximum": 5}
+  },
+  "$defs": {
+    "component": {
+      "type": "object",
+      "required": ["status", "configured_weight"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {"enum": ["APPLICABLE", "NOT_APPLICABLE"]},
+        "score": {"type": "number", "minimum": 1, "maximum": 5},
+        "configured_weight": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "cap": {
+      "type": "object",
+      "required": ["policy_id", "max_score"],
+      "additionalProperties": false,
+      "properties": {
+        "policy_id": {"type": "string", "minLength": 1},
+        "max_score": {"type": "number", "minimum": 1, "maximum": 5},
+        "evidence_ids": {"type": "array", "items": {"type": "string"}}
+      }
+    }
+  }
+}
+

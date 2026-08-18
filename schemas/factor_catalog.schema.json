@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/factor_catalog.schema.json",
+  "title": "Factor Catalog",
+  "type": "object",
+  "required": ["catalog_version", "factors"],
+  "additionalProperties": false,
+  "properties": {
+    "catalog_version": {"type": "string", "minLength": 1},
+    "factors": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["factor_id", "label", "description", "aliases", "entity_types", "allowed_roles"],
+        "additionalProperties": false,
+        "properties": {
+          "factor_id": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+          "label": {"type": "string", "minLength": 1},
+          "description": {"type": "string", "minLength": 1},
+          "aliases": {"type": "array", "items": {"type": "string"}},
+          "entity_types": {
+            "type": "array",
+            "items": {"enum": ["MARKET", "INDUSTRY", "STOCK", "PORTFOLIO"]}
+          },
+          "allowed_roles": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "enum": [
+                "TRIGGER",
+                "DIRECT_EXPOSURE",
+                "CAUSAL_MEDIATOR",
+                "PARALLEL_CONTEXT",
+                "MARKET_MODIFIER",
+                "PORTFOLIO_CONSTRAINT",
+                "TARGET_OUTCOME"
+              ]
+            }
+          }
+        }
+      }
+    }
+  }
+}
+

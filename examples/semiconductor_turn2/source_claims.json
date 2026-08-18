@@ -1,0 +1,75 @@
+{
+  "source_policy_version": "temporal-source-v1.1",
+  "claims": [
+    {
+      "claim_id": "CLM-FIX-AI-CAPEX",
+      "source_id": "SRC-FIX-001",
+      "source_type": "FIXTURE",
+      "source_url": "fixture://semiconductor-turn2/ai-capex",
+      "text": "AI 인프라 투자가 확대되고 있다.",
+      "evidence_span": "AI 인프라 투자가 확대",
+      "published_at": "2024-02-20T09:00:00+09:00",
+      "available_at": "2024-02-20T09:00:00+09:00",
+      "valid_from": "2024-02-20T09:00:00+09:00",
+      "valid_to": null,
+      "knowledge_role": "AS_OF_EVIDENCE",
+      "public_status": "PUBLIC_AS_OF",
+      "visibility_status": "VISIBLE_TO_USER",
+      "scoring_eligibility": "MANDATORY_ELIGIBLE",
+      "allowed_uses": ["USER_INPUT", "SCORING", "GRAPH_AUTHORING", "POST_TURN_FEEDBACK"]
+    },
+    {
+      "claim_id": "CLM-FIX-HBM-DEMAND",
+      "source_id": "SRC-FIX-002",
+      "source_type": "FIXTURE",
+      "source_url": "fixture://semiconductor-turn2/hbm-demand",
+      "text": "AI 가속기 확대는 HBM 수요 증가와 연결된다.",
+      "evidence_span": "HBM 수요 증가와 연결",
+      "published_at": "2024-02-20T10:00:00+09:00",
+      "available_at": "2024-02-20T10:00:00+09:00",
+      "valid_from": "2024-02-20T10:00:00+09:00",
+      "valid_to": null,
+      "knowledge_role": "AS_OF_EVIDENCE",
+      "public_status": "PUBLIC_AS_OF",
+      "visibility_status": "VISIBLE_TO_USER",
+      "scoring_eligibility": "MANDATORY_ELIGIBLE",
+      "allowed_uses": ["USER_INPUT", "SCORING", "GRAPH_AUTHORING", "POST_TURN_FEEDBACK"]
+    },
+    {
+      "claim_id": "CLM-FIX-TARGET-EXPOSURE",
+      "source_id": "SRC-FIX-003",
+      "source_type": "FIXTURE",
+      "source_url": "fixture://semiconductor-turn2/target-exposure",
+      "text": "대상 기업은 HBM 제품 매출 노출을 가진다.",
+      "evidence_span": "HBM 제품 매출 노출",
+      "published_at": "2024-02-21T09:00:00+09:00",
+      "available_at": "2024-02-21T09:00:00+09:00",
+      "valid_from": "2024-02-21T09:00:00+09:00",
+      "valid_to": null,
+      "knowledge_role": "AS_OF_EVIDENCE",
+      "public_status": "PUBLIC_AS_OF",
+      "visibility_status": "VISIBLE_TO_USER",
+      "scoring_eligibility": "MANDATORY_ELIGIBLE",
+      "allowed_uses": ["USER_INPUT", "SCORING", "GRAPH_AUTHORING", "POST_TURN_FEEDBACK"]
+    },
+    {
+      "claim_id": "CLM-FIX-EARNINGS",
+      "source_id": "SRC-FIX-004",
+      "source_type": "FIXTURE",
+      "source_url": "fixture://semiconductor-turn2/earnings",
+      "text": "제품 수요 증가는 대상 기업의 실적 기대에 영향을 줄 수 있다.",
+      "evidence_span": "실적 기대에 영향을 줄 수 있다",
+      "published_at": "2024-02-21T10:00:00+09:00",
+      "available_at": "2024-02-21T10:00:00+09:00",
+      "valid_from": "2024-02-21T10:00:00+09:00",
+      "valid_to": null,
+      "knowledge_role": "AS_OF_EVIDENCE",
+      "public_status": "PUBLIC_AS_OF",
+      "visibility_status": "VISIBLE_TO_USER",
+      "scoring_eligibility": "MANDATORY_ELIGIBLE",
+      "allowed_uses": ["USER_INPUT", "SCORING", "GRAPH_AUTHORING", "POST_TURN_FEEDBACK"]
+    }
+  ]
+}
+
+

@@ -1,0 +1,176 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/factor_graph.schema.json",
+  "title": "Turn Causal Factor Graph",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "scenario_id",
+    "scenario_version",
+    "turn_no",
+    "information_cutoff_at",
+    "learning_focus",
+    "nodes",
+    "edges",
+    "paths",
+    "source_policy_version",
+    "graph_version"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "causal-factor-graph-v1.1"},
+    "scenario_id": {"type": "string", "minLength": 1},
+    "scenario_version": {"type": "integer", "minimum": 1},
+    "turn_no": {"type": "integer", "minimum": 1},
+    "information_cutoff_at": {"type": "string", "format": "date-time"},
+    "learning_focus": {"type": "array", "items": {"type": "string"}},
+    "rationale_prompt": {"type": "string"},
+    "source_policy_version": {"const": "temporal-source-v1.1"},
+    "graph_version": {"type": "string", "minLength": 1},
+    "fixture_only": {"type": "boolean"},
+    "nodes": {"type": "array", "items": {"$ref": "#/$defs/node"}},
+    "edges": {"type": "array", "items": {"$ref": "#/$defs/edge"}},
+    "paths": {"type": "array", "items": {"$ref": "#/$defs/path"}},
+    "complexity_profile": {"$ref": "#/$defs/complexityProfile"}
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": [
+        "node_id",
+        "factor_id",
+        "scope",
+        "entity_ids",
+        "expected_direction",
+        "importance",
+        "source_claim_refs",
+        "scoring_eligibility"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "node_id": {"type": "string", "minLength": 1},
+        "factor_id": {"type": "string", "pattern": "^[A-Z0-9_]+$"},
+        "scope": {"enum": ["MARKET", "INDUSTRY", "STOCK", "PORTFOLIO"]},
+        "entity_ids": {"type": "array", "items": {"type": "string"}},
+        "expected_direction": {"enum": ["POSITIVE", "NEGATIVE", "MIXED", "CONDITIONAL"]},
+        "importance": {"enum": ["REQUIRED", "SUPPORTING", "OPTIONAL"]},
+        "available_from_turn": {"type": "integer", "minimum": 1},
+        "horizon": {"enum": ["SHORT", "MEDIUM", "LONG", "TURN_DEFINED"]},
+        "source_claim_refs": {"type": "array", "items": {"type": "string"}},
+        "scoring_eligibility": {"enum": ["MANDATORY_ELIGIBLE", "OPTIONAL_ELIGIBLE", "FEEDBACK_ONLY"]},
+        "as_of_justification_ref": {"type": ["string", "null"]}
+      }
+    },
+    "edge": {
+      "type": "object",
+      "required": [
+        "edge_id",
+        "from_node",
+        "to_node",
+        "relation",
+        "sign",
+        "strength",
+        "lag",
+        "importance",
+        "conditions",
+        "valid_from",
+        "evidence_available_at",
+        "source_claim_refs",
+        "temporal_status",
+        "scoring_eligibility"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "edge_id": {"type": "string", "minLength": 1},
+        "from_node": {"type": "string", "minLength": 1},
+        "to_node": {"type": "string", "minLength": 1},
+        "relation": {
+          "enum": ["CAUSES", "INCREASES", "DECREASES", "AMPLIFIES", "MITIGATES", "EXPOSES", "PRICES_IN", "CONTRADICTS", "CONDITIONAL_ON"]
+        },
+        "sign": {"enum": ["POSITIVE", "NEGATIVE", "MIXED", "CONDITIONAL"]},
+        "strength": {"enum": ["STRONG", "MEDIUM", "WEAK", "CONDITIONAL"]},
+        "lag": {"enum": ["IMMEDIATE", "SHORT", "MEDIUM", "LONG"]},
+        "importance": {"enum": ["REQUIRED", "SUPPORTING", "OPTIONAL"]},
+        "conditions": {"type": "array", "items": {"type": "string"}},
+        "valid_from": {"type": "string", "format": "date-time"},
+        "valid_to": {"type": ["string", "null"], "format": "date-time"},
+        "evidence_available_at": {"type": "string", "format": "date-time"},
+        "source_claim_refs": {"type": "array", "items": {"type": "string"}},
+        "temporal_status": {"enum": ["PUBLIC_AS_OF", "NOT_PUBLIC_AS_OF", "UNKNOWN"]},
+        "scoring_eligibility": {"enum": ["MANDATORY_ELIGIBLE", "OPTIONAL_ELIGIBLE", "FEEDBACK_ONLY"]},
+        "as_of_justification_ref": {"type": ["string", "null"]}
+      }
+    },
+    "pathNode": {
+      "type": "object",
+      "required": ["sequence", "node_id", "path_node_role", "segment_id"],
+      "additionalProperties": false,
+      "properties": {
+        "sequence": {"type": "integer", "minimum": 1},
+        "node_id": {"type": "string", "minLength": 1},
+        "path_node_role": {
+          "enum": ["TRIGGER", "DIRECT_EXPOSURE", "CAUSAL_MEDIATOR", "PARALLEL_CONTEXT", "MARKET_MODIFIER", "PORTFOLIO_CONSTRAINT", "TARGET_OUTCOME"]
+        },
+        "segment_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "segment": {
+      "type": "object",
+      "required": ["segment_id", "one_of_node_ids"],
+      "additionalProperties": false,
+      "properties": {
+        "segment_id": {"type": "string", "minLength": 1},
+        "one_of_node_ids": {"type": "array", "minItems": 1, "items": {"type": "string"}}
+      }
+    },
+    "path": {
+      "type": "object",
+      "required": [
+        "path_id",
+        "label",
+        "path_class",
+        "source_scope",
+        "target_scope",
+        "target_entity_ids",
+        "path_nodes",
+        "edge_ids",
+        "required_semantic_segments",
+        "importance",
+        "applicability",
+        "feedback_release"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "path_id": {"type": "string", "minLength": 1},
+        "label": {"type": "string", "minLength": 1},
+        "path_class": {"enum": ["DIRECT", "INDIRECT", "PARALLEL", "MODIFIER"]},
+        "source_scope": {"enum": ["MARKET", "INDUSTRY", "STOCK", "PORTFOLIO"]},
+        "target_scope": {"enum": ["MARKET", "INDUSTRY", "STOCK", "PORTFOLIO"]},
+        "target_entity_ids": {"type": "array", "items": {"type": "string"}},
+        "path_nodes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/pathNode"}},
+        "edge_ids": {"type": "array", "items": {"type": "string"}},
+        "required_semantic_segments": {
+          "type": "array",
+          "maxItems": 4,
+          "items": {"$ref": "#/$defs/segment"}
+        },
+        "alternative_group_id": {"type": ["string", "null"]},
+        "importance": {"enum": ["REQUIRED", "SUPPORTING", "OPTIONAL"]},
+        "applicability": {"enum": ["APPLICABLE", "NOT_APPLICABLE"]},
+        "feedback_release": {"enum": ["POST_TURN_AS_OF", "FINAL_REVIEW_ONLY"]}
+      }
+    },
+    "complexityProfile": {
+      "type": "object",
+      "required": ["required_segment_count", "optional_mediator_count", "difficulty_band", "author_review_status"],
+      "additionalProperties": false,
+      "properties": {
+        "required_segment_count": {"type": "integer", "minimum": 0, "maximum": 4},
+        "optional_mediator_count": {"type": "integer", "minimum": 0},
+        "difficulty_band": {"enum": ["FOUNDATION", "INTERMEDIATE", "ADVANCED"]},
+        "author_review_status": {"enum": ["DRAFT", "VERIFIED"]}
+      }
+    }
+  }
+}
+

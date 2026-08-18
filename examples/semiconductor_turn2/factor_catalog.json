@@ -1,0 +1,39 @@
+{
+  "catalog_version": "factor-catalog-fixture-v1",
+  "factors": [
+    {
+      "factor_id": "AI_CAPEX_GROWTH",
+      "label": "AI 인프라 투자 확대",
+      "description": "AI 서버와 가속기 인프라 투자가 확대되는 상태",
+      "aliases": ["AI 투자 확대", "AI 인프라 증설"],
+      "entity_types": ["MARKET", "INDUSTRY"],
+      "allowed_roles": ["TRIGGER"]
+    },
+    {
+      "factor_id": "HBM_DEMAND_GROWTH",
+      "label": "HBM 수요 증가",
+      "description": "AI 가속기용 고대역폭 메모리 수요가 증가하는 상태",
+      "aliases": ["HBM 수요 증가", "고대역폭 메모리 수요 확대"],
+      "entity_types": ["INDUSTRY"],
+      "allowed_roles": ["CAUSAL_MEDIATOR", "DIRECT_EXPOSURE"]
+    },
+    {
+      "factor_id": "TARGET_HBM_PRODUCT_EXPOSURE",
+      "label": "대상 기업의 HBM 제품 노출",
+      "description": "대상 기업의 제품과 매출이 HBM 수요에 노출되는 상태",
+      "aliases": ["HBM 제품 비중", "HBM 매출 노출"],
+      "entity_types": ["STOCK"],
+      "allowed_roles": ["DIRECT_EXPOSURE"]
+    },
+    {
+      "factor_id": "TARGET_EARNINGS_EXPECTATION",
+      "label": "대상 기업 실적 기대 변화",
+      "description": "수요와 제품 노출이 대상 기업의 매출과 이익 기대에 반영되는 상태",
+      "aliases": ["실적 개선 기대", "매출 증가 기대"],
+      "entity_types": ["STOCK"],
+      "allowed_roles": ["TARGET_OUTCOME"]
+    }
+  ]
+}
+
+
