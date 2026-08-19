@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/runtime_bundle.schema.json",
+  "title": "Portable Runtime Evaluator Bundle",
+  "type": "object",
+  "required": ["bundle_format_version", "manifest", "resources"],
+  "additionalProperties": false,
+  "properties": {
+    "bundle_format_version": {"const": "runtime-bundle-v1"},
+    "manifest": {"$ref": "evaluator_bundle.schema.json"},
+    "resources": {
+      "type": "object",
+      "required": ["factor_catalog", "source_claims", "compiled_graph"],
+      "additionalProperties": false,
+      "properties": {
+        "factor_catalog": {"type": "object"},
+        "source_claims": {"type": "object"},
+        "compiled_graph": {"type": "object"}
+      }
+    }
+  }
+}

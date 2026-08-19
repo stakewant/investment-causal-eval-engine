@@ -30,7 +30,7 @@
     "model_confidence": {"type": "number", "minimum": 0, "maximum": 1},
     "matched_edge_ids": {"type": "array", "items": {"type": "string"}},
     "validation_status": {"enum": ["SCORE_ELIGIBLE", "FEEDBACK_ONLY", "REVIEW_REQUIRED", "REJECTED"]},
-    "relation_extractor_version": {"type": "string", "minLength": 1}
+    "relation_extractor_version": {"type": "string", "minLength": 1},
+    "diagnostic_codes": {"type": "array", "items": {"type": "string"}}
   }
 }
-

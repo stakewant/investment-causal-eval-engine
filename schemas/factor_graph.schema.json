@@ -28,6 +28,23 @@
     "source_policy_version": {"const": "temporal-source-v1.1"},
     "graph_version": {"type": "string", "minLength": 1},
     "fixture_only": {"type": "boolean"},
+    "author_reviews": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["review_pass_id", "reviewer_id", "reviewed_at", "decision", "graph_version"],
+        "additionalProperties": false,
+        "properties": {
+          "review_pass_id": {"type": "string", "minLength": 1},
+          "reviewer_id": {"type": "string", "minLength": 1},
+          "reviewed_at": {"type": "string", "format": "date-time"},
+          "decision": {"enum": ["APPROVE", "REQUEST_CHANGES"]},
+          "graph_version": {"type": "string", "minLength": 1},
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "m6_config": {"$ref": "#/$defs/m6Config"},
     "nodes": {"type": "array", "items": {"$ref": "#/$defs/node"}},
     "edges": {"type": "array", "items": {"$ref": "#/$defs/edge"}},
     "paths": {"type": "array", "items": {"$ref": "#/$defs/path"}},
@@ -160,6 +177,33 @@
         "feedback_release": {"enum": ["POST_TURN_AS_OF", "FINAL_REVIEW_ONLY"]}
       }
     },
+    "m6Config": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "component_weights": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "target_exposure_reasoning": {"type": "number", "minimum": 0, "maximum": 1},
+            "causal_transmission_reasoning": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        },
+        "path_class_weights": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "DIRECT": {"type": "number", "minimum": 0},
+            "INDIRECT": {"type": "number", "minimum": 0},
+            "PARALLEL": {"type": "number", "minimum": 0},
+            "MODIFIER": {"type": "number", "minimum": 0}
+          }
+        },
+        "required_entity_ids": {"type": "array", "items": {"type": "string"}},
+        "require_largest_trade_explanation": {"type": "boolean"},
+        "max_assets": {"type": "integer", "minimum": 1, "maximum": 3}
+      }
+    },
     "complexityProfile": {
       "type": "object",
       "required": ["required_segment_count", "optional_mediator_count", "difficulty_band", "author_review_status"],
@@ -173,4 +217,3 @@
     }
   }
 }
-

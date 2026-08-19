@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/evaluation_input.schema.json",
+  "title": "Standalone Shadow Evaluation Input",
+  "type": "object",
+  "required": ["session_id", "scenario_id", "scenario_version", "turn_no", "answers"],
+  "additionalProperties": false,
+  "properties": {
+    "session_id": {"type": "string", "minLength": 1},
+    "scenario_id": {"type": "string", "minLength": 1},
+    "scenario_version": {"type": "integer", "minimum": 1},
+    "turn_no": {"type": "integer", "minimum": 1},
+    "answers": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/answer"}},
+    "orders": {"type": "array", "items": {"$ref": "#/$defs/order"}},
+    "portfolio_before": {"type": "array", "items": {"$ref": "#/$defs/holding"}},
+    "portfolio_after": {"type": "array", "items": {"$ref": "#/$defs/holding"}},
+    "visible_claim_ids": {"type": "array", "items": {"type": "string"}},
+    "dependency_diagnostics": {"type": "array", "items": {"type": "object"}}
+  },
+  "$defs": {
+    "answer": {
+      "type": "object",
+      "required": ["question_id", "text"],
+      "additionalProperties": false,
+      "properties": {
+        "question_id": {"type": "string", "minLength": 1},
+        "text": {"type": "string"},
+        "selected": {"type": "array", "items": {"type": "string"}},
+        "target_entity_ids": {"type": "array", "items": {"type": "string"}},
+        "requires_explanation": {"type": "boolean"}
+      }
+    },
+    "order": {
+      "type": "object",
+      "required": ["entity_id", "side"],
+      "additionalProperties": false,
+      "properties": {
+        "entity_id": {"type": "string"},
+        "side": {"enum": ["BUY", "SELL", "HOLD"]},
+        "filled_quantity": {"type": "number"},
+        "filled_price": {"type": "number"}
+      }
+    },
+    "holding": {
+      "type": "object",
+      "required": ["entity_id"],
+      "additionalProperties": false,
+      "properties": {
+        "entity_id": {"type": "string"},
+        "quantity": {"type": "number"},
+        "market_price": {"type": "number"},
+        "weight": {"type": ["number", "null"]}
+      }
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/evaluation_result.schema.json",
+  "title": "Standalone Shadow Evaluation Record",
+  "type": "object",
+  "required": ["engine_version", "evaluation_record_id", "session_id", "turn_no", "evaluator_bundle_id", "input_snapshot_hash", "scenario_id", "scenario_version", "evaluation_mode", "legacy_score_effect", "evidence", "relation_evidence", "novel_path_candidates", "m6", "feedback_plan", "feedback", "audit"],
+  "additionalProperties": false,
+  "properties": {
+    "engine_version": {"type": "string"},
+    "evaluation_record_id": {"type": "string"},
+    "session_id": {"type": "string"},
+    "turn_no": {"type": "integer"},
+    "evaluator_bundle_id": {"type": "string"},
+    "input_snapshot_hash": {"type": "string"},
+    "scenario_id": {"type": "string"},
+    "scenario_version": {"type": "integer"},
+    "evaluation_mode": {"const": "SHADOW"},
+    "legacy_score_effect": {"const": 0},
+    "evidence": {"type": "array", "items": {"type": "object"}},
+    "relation_evidence": {"type": "array", "items": {"type": "object"}},
+    "novel_path_candidates": {"type": "array", "items": {"type": "object"}},
+    "m6": {"$ref": "m6_result.schema.json"},
+    "feedback_plan": {"type": "object"},
+    "feedback": {"type": "object"},
+    "audit": {"type": "object"}
+  }
+}

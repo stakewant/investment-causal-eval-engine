@@ -1,0 +1,24 @@
+{
+  "session_id": "fixture-session-list-only",
+  "scenario_id": "semiconductor-fixture",
+  "scenario_version": 1,
+  "turn_no": 2,
+  "answers": [
+    {
+      "question_id": "RATIONALE-T2",
+      "text": "AI 투자 확대, HBM 수요 증가, SK하이닉스 HBM 제품 비중, 실적 개선 기대.",
+      "selected": ["BUY"],
+      "target_entity_ids": ["000660"],
+      "requires_explanation": true
+    }
+  ],
+  "orders": [
+    {"entity_id": "000660", "side": "BUY", "filled_quantity": 20, "filled_price": 150000}
+  ],
+  "portfolio_before": [],
+  "portfolio_after": [
+    {"entity_id": "000660", "quantity": 20, "market_price": 150000, "weight": 0.30}
+  ],
+  "visible_claim_ids": ["CLM-FIX-AI-CAPEX", "CLM-FIX-HBM-DEMAND", "CLM-FIX-TARGET-EXPOSURE", "CLM-FIX-EARNINGS"],
+  "dependency_diagnostics": []
+}

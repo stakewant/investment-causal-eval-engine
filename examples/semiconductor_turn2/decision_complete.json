@@ -1,0 +1,24 @@
+{
+  "session_id": "fixture-session-complete",
+  "scenario_id": "semiconductor-fixture",
+  "scenario_version": 1,
+  "turn_no": 2,
+  "answers": [
+    {
+      "question_id": "RATIONALE-T2",
+      "text": "AI 투자 확대 때문에 HBM 수요 증가가 이어지고, SK하이닉스의 HBM 제품 비중은 해당 수요에 직접 노출되어 실적 개선 기대가 커진다고 판단했다.",
+      "selected": ["BUY"],
+      "target_entity_ids": ["000660"],
+      "requires_explanation": true
+    }
+  ],
+  "orders": [
+    {"entity_id": "000660", "side": "BUY", "filled_quantity": 10, "filled_price": 150000}
+  ],
+  "portfolio_before": [],
+  "portfolio_after": [
+    {"entity_id": "000660", "quantity": 10, "market_price": 150000, "weight": 0.15}
+  ],
+  "visible_claim_ids": ["CLM-FIX-AI-CAPEX", "CLM-FIX-HBM-DEMAND", "CLM-FIX-TARGET-EXPOSURE", "CLM-FIX-EARNINGS"],
+  "dependency_diagnostics": []
+}

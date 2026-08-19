@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/feedback_plan.schema.json",
+  "title": "Temporally Safe Feedback Plan",
+  "type": "object",
+  "required": ["planner_version", "information_cutoff_at", "validation_status", "violations", "items"],
+  "additionalProperties": false,
+  "properties": {
+    "planner_version": {"type": "string"},
+    "information_cutoff_at": {"type": "string", "format": "date-time"},
+    "validation_status": {"enum": ["ACCEPTED", "TEMPORAL_OUTPUT_REJECTED"]},
+    "violations": {"type": "array", "items": {"type": "string"}},
+    "items": {"type": "array", "items": {"type": "object"}}
+  }
+}

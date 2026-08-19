@@ -16,4 +16,20 @@ python src/compile_causal_graph.py `
   --output outputs/semiconductor_turn2.compiled.json
 ```
 
+독립 평가 실행:
+
+```powershell
+causal-engine build-bundle `
+  --catalog examples/semiconductor_turn2/factor_catalog.json `
+  --claims examples/semiconductor_turn2/source_claims.json `
+  --graph examples/semiconductor_turn2/graph.json `
+  --output outputs/semiconductor_turn2.bundle.json
+
+causal-engine evaluate `
+  --bundle outputs/semiconductor_turn2.bundle.json `
+  --input examples/semiconductor_turn2/decision_complete.json `
+  --output outputs/semiconductor_turn2.complete.result.json
+```
+
+`decision_partial.json`은 종목 노출 누락, `decision_list_only.json`은 관계 없는 요인 나열 회귀 테스트용이다.
 

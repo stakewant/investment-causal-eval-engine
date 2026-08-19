@@ -170,6 +170,20 @@ LLM-Rubric은 다차원 루브릭과 사람 평가에 대한 calibration의 필�
 - [인과 요인 그래프 스키마 v1](./CAUSAL_FACTOR_GRAPH_SCHEMA_V1.md)
 - [M6 영향 경로·대상 연결 채점 정책 v1](./M6_SCORING_POLICY_V1.md)
 
+## 8. 구현 추적표
+
+| 연구 근거 | 구현 요소 | 검증 |
+|---|---|---|
+| [R1], [R2] 결과·사후편향 | `TemporalPolicy`, source snapshot, outcome 분리 | 미래 visible claim 거부 테스트 |
+| [R5]~[R8] 부분 이해·설명 span | `Evidence`, 원문 offset Validator, `PARTIAL` | span F1, 부분답안 회귀 실험 |
+| [R9], [R12], [R16] 주장·금융 관계 | 독립 `RelationEvidence`와 connector | relation Macro-F1, 나열 답안 `DISCONNECTED` |
+| [R10] 연결된 설명 그래프 | DAG compiler, 의미 구간 Graph Matcher | 연결성·완전성·대체경로 테스트 |
+| [R11] span 기반 다중과제 추출 | 외부 neural candidate 계약과 공통 Validator | factor/scope/direction/entity ablation |
+| [R13] 텍스트+그래프 품질 | path status와 M6 구성요소 | path accuracy, M6 QWK |
+| [R14] 의미 후보 검색 | `extractor_sources=EMBEDDING` 확장 지점 | alias 대비 candidate recall |
+| [R15] 사람 보정 평가 | `RubricCalibrator`, ECE/QWK/ICC 도구 | 고정 test set calibration 실험 |
+
+현재 해시 softmax와 feed-forward calibrator는 연구 파이프라인을 실행하는 기준선이며 논문의 최종 신경 모델 성능을 미리 주장하지 않는다.
 
 
 

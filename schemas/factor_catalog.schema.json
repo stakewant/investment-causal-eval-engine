@@ -7,6 +7,20 @@
   "additionalProperties": false,
   "properties": {
     "catalog_version": {"type": "string", "minLength": 1},
+    "entities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["entity_id", "label", "aliases", "scope"],
+        "additionalProperties": false,
+        "properties": {
+          "entity_id": {"type": "string", "minLength": 1},
+          "label": {"type": "string", "minLength": 1},
+          "aliases": {"type": "array", "items": {"type": "string"}},
+          "scope": {"enum": ["MARKET", "INDUSTRY", "STOCK", "PORTFOLIO"]}
+        }
+      }
+    },
     "factors": {
       "type": "array",
       "minItems": 1,
@@ -37,10 +51,18 @@
                 "TARGET_OUTCOME"
               ]
             }
-          }
+          },
+          "direction_patterns": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "POSITIVE": {"type": "array", "items": {"type": "string"}},
+              "NEGATIVE": {"type": "array", "items": {"type": "string"}}
+            }
+          },
+          "negation_patterns": {"type": "array", "items": {"type": "string"}}
         }
       }
     }
   }
 }
-
