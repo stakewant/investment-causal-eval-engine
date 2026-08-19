@@ -4,14 +4,18 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "investment-causal-eval-engine"
-version = "0.1.0"
+version = "0.2.0"
 description = "Temporal causal-path evaluation engine for investment scenario rationales"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = []
 
+[project.optional-dependencies]
+validation = ["jsonschema>=4.23,<5"]
+
 [project.scripts]
 causal-graph-compile = "causal_engine.cli:main"
+causal-engine = "causal_engine.app_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

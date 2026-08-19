@@ -22,3 +22,14 @@ class GraphCompileError(ValueError):
         super().__init__(message)
 
 
+class ContractError(ValueError):
+    """Raised when a runtime input violates an explicit engine contract."""
+
+
+class BundleError(ValueError):
+    """Raised when an immutable evaluator bundle cannot be verified."""
+
+
+class EvaluationError(ValueError):
+    """Raised when shadow evaluation cannot safely continue."""
+

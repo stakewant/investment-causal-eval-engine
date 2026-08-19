@@ -1,0 +1,39 @@
+{
+  "format_version": "causal-experiment-v1",
+  "experiment_id": "semiconductor-turn2-regression-v1",
+  "bundle": {
+    "catalog": "factor_catalog.json",
+    "claims": "source_claims.json",
+    "graph": "graph.json"
+  },
+  "cases": [
+    {
+      "case_id": "complete-causal-chain",
+      "input": "decision_complete.json",
+      "expected": {
+        "m6_status": "SCORED",
+        "path_status": "COMPLETE",
+        "minimum_m6": 4.5
+      }
+    },
+    {
+      "case_id": "industry-only-partial",
+      "input": "decision_partial.json",
+      "expected": {
+        "m6_status": "SCORED",
+        "path_status": "PARTIAL",
+        "minimum_m6": 2.0,
+        "maximum_m6": 3.5
+      }
+    },
+    {
+      "case_id": "factor-list-disconnected",
+      "input": "decision_list_only.json",
+      "expected": {
+        "m6_status": "SCORED",
+        "path_status": "DISCONNECTED",
+        "maximum_m6": 3.0
+      }
+    }
+  ]
+}

@@ -8,7 +8,7 @@ from typing import Any
 
 from .errors import CompileIssue, GraphCompileError
 
-COMPILER_VERSION = "graph-compiler-v0.1.0"
+COMPILER_VERSION = "graph-compiler-v0.2.0"
 
 KNOWLEDGE_ROLES = {
     "AS_OF_EVIDENCE",
@@ -114,7 +114,8 @@ class GraphCompiler:
         claims = self._validate_source_claims(cutoff)
         nodes = self._validate_nodes(factors, claims, cutoff)
         edges = self._validate_edges(nodes, claims, cutoff)
-        self._validate_paths(factors, claims, nodes, edges)
+        paths = self._validate_paths(factors, claims, nodes, edges)
+        self._validate_graph_contract(nodes, paths)
 
         if self.issues:
             raise GraphCompileError(self.issues)
@@ -135,17 +136,33 @@ class GraphCompiler:
         }
 
     def _validate_factor_catalog(self) -> dict[str, dict[str, Any]]:
+        entities = _index_by_id(
+            self.factor_catalog.get("entities", []),
+            id_field="entity_id",
+            collection_path="factor_catalog.entities",
+            issues=self.issues,
+        )
+        self._entity_ids = set(entities)
         factors = _index_by_id(
             self.factor_catalog.get("factors"),
             id_field="factor_id",
             collection_path="factor_catalog.factors",
             issues=self.issues,
         )
+        alias_owners: dict[str, set[str]] = {}
         for factor_id, factor in factors.items():
             path = f"factor_catalog.factors[{factor_id}]"
             roles = factor.get("allowed_roles")
             if not isinstance(roles, list) or not roles or not all(isinstance(role, str) for role in roles):
                 self.issues.append(CompileIssue("E_ALLOWED_ROLES", f"{path}.allowed_roles", "non-empty string array required"))
+            for alias in [factor.get("label"), *factor.get("aliases", [])]:
+                if isinstance(alias, str) and alias.strip():
+                    alias_owners.setdefault(alias.casefold().replace(" ", ""), set()).add(factor_id)
+        for alias, owners in alias_owners.items():
+            if len(owners) > 1:
+                self.warnings.append(
+                    CompileIssue("W_AMBIGUOUS_ALIAS", "factor_catalog.factors", f"alias {alias!r} belongs to {sorted(owners)}")
+                )
         return factors
 
     def _validate_source_claims(self, cutoff: datetime | None) -> dict[str, dict[str, Any]]:
@@ -246,12 +263,17 @@ class GraphCompiler:
             factor_id = node.get("factor_id")
             if factor_id not in factors:
                 self.issues.append(CompileIssue("E_UNKNOWN_FACTOR", f"{path}.factor_id", f"unknown factor: {factor_id}"))
+            elif node.get("scope") not in factors[factor_id].get("entity_types", []):
+                self.issues.append(CompileIssue("E_FACTOR_SCOPE", f"{path}.scope", f"scope is not allowed by factor {factor_id}"))
             if "role" in node:
                 self.issues.append(CompileIssue("E_FIXED_NODE_ROLE", f"{path}.role", "role belongs to path_nodes, not graph nodes"))
             if node.get("importance") not in IMPORTANCE_VALUES:
                 self.issues.append(CompileIssue("E_IMPORTANCE", f"{path}.importance", "unsupported importance"))
             if node.get("scope") == "STOCK" and not node.get("entity_ids"):
                 self.issues.append(CompileIssue("E_STOCK_ENTITY", f"{path}.entity_ids", "stock node requires at least one entity id"))
+            unknown_entities = set(node.get("entity_ids", [])) - getattr(self, "_entity_ids", set())
+            if unknown_entities:
+                self.issues.append(CompileIssue("E_UNKNOWN_ENTITY", f"{path}.entity_ids", f"unknown entities: {sorted(unknown_entities)}"))
             self._validate_claim_refs(path, node.get("source_claim_refs"), claims)
             if node.get("importance") == "REQUIRED" and not self._has_mandatory_claim(node.get("source_claim_refs"), claims):
                 self.issues.append(CompileIssue("E_REQUIRED_EVIDENCE", path, "required node needs at least one mandatory-eligible claim"))
@@ -292,11 +314,22 @@ class GraphCompiler:
                 field_path=f"{path}.valid_from",
                 issues=self.issues,
             )
+            valid_to = None
+            if edge.get("valid_to") is not None:
+                valid_to = _parse_datetime(
+                    edge.get("valid_to"),
+                    field_path=f"{path}.valid_to",
+                    issues=self.issues,
+                )
             if cutoff is not None:
                 if evidence_available_at is not None and evidence_available_at > cutoff and edge.get("importance") == "REQUIRED":
                     self.issues.append(CompileIssue("E_TEMPORAL_LEAKAGE", path, "required edge evidence is available after cutoff"))
                 if valid_from is not None and valid_from > cutoff and edge.get("importance") == "REQUIRED":
                     self.issues.append(CompileIssue("E_EDGE_NOT_YET_VALID", path, "required edge is not valid at cutoff"))
+                if valid_to is not None and valid_to < cutoff and edge.get("importance") == "REQUIRED":
+                    self.issues.append(CompileIssue("E_EDGE_EXPIRED", path, "required edge expired before cutoff"))
+            if valid_from is not None and valid_to is not None and valid_to < valid_from:
+                self.issues.append(CompileIssue("E_INVALID_VALIDITY_RANGE", path, "valid_to precedes valid_from"))
             if edge.get("temporal_status") == "PUBLIC_AS_OF" and evidence_available_at is not None and cutoff is not None and evidence_available_at > cutoff:
                 self.issues.append(CompileIssue("E_PUBLIC_STATUS_CONTRADICTION", f"{path}.temporal_status", "edge is marked PUBLIC_AS_OF after cutoff"))
         return edges
@@ -307,7 +340,7 @@ class GraphCompiler:
         claims: dict[str, dict[str, Any]],
         nodes: dict[str, dict[str, Any]],
         edges: dict[str, dict[str, Any]],
-    ) -> None:
+    ) -> dict[str, dict[str, Any]]:
         paths = _index_by_id(
             self.graph.get("paths"),
             id_field="path_id",
@@ -425,6 +458,14 @@ class GraphCompiler:
                                 f"POST_TURN_AS_OF path references non-as-of claim: {claim_id}",
                             )
                         )
+                    if claim and "POST_TURN_FEEDBACK" not in claim.get("allowed_uses", []):
+                        self.issues.append(
+                            CompileIssue(
+                                "E_FEEDBACK_USE_NOT_ALLOWED",
+                                path,
+                                f"claim does not allow POST_TURN_FEEDBACK: {claim_id}",
+                            )
+                        )
 
             optional_mediators = sum(
                 1
@@ -435,6 +476,112 @@ class GraphCompiler:
             )
             if optional_mediators > 4:
                 self.warnings.append(CompileIssue("W_LONG_OPTIONAL_PATH", path, "more than four optional mediators"))
+        self._validate_alternative_groups(paths)
+        return paths
+
+    def _validate_graph_contract(
+        self,
+        nodes: dict[str, dict[str, Any]],
+        paths: dict[str, dict[str, Any]],
+    ) -> None:
+        if self.graph.get("schema_version") != "causal-factor-graph-v1.1":
+            self.issues.append(CompileIssue("E_GRAPH_SCHEMA_VERSION", "graph.schema_version", "unsupported graph schema version"))
+        if self.graph.get("source_policy_version") != self.source_claims.get("source_policy_version"):
+            self.issues.append(CompileIssue("E_SOURCE_POLICY_MISMATCH", "graph.source_policy_version", "graph and source claims policy versions differ"))
+        complexity = self.graph.get("complexity_profile")
+        if isinstance(complexity, dict):
+            required_counts = [
+                len(path.get("required_semantic_segments", []))
+                for path in paths.values()
+                if path.get("importance") == "REQUIRED" and path.get("applicability") == "APPLICABLE"
+            ]
+            expected = max(required_counts, default=0)
+            if complexity.get("required_segment_count") != expected:
+                self.issues.append(
+                    CompileIssue("E_COMPLEXITY_SEGMENT_COUNT", "graph.complexity_profile.required_segment_count", f"expected {expected}")
+                )
+            if not self.graph.get("fixture_only"):
+                if complexity.get("author_review_status") != "VERIFIED":
+                    self.issues.append(
+                        CompileIssue("E_AUTHOR_REVIEW_REQUIRED", "graph.complexity_profile.author_review_status", "non-fixture graph must be VERIFIED")
+                    )
+                else:
+                    self._validate_author_reviews()
+        if not self.graph.get("fixture_only"):
+            fixture_claims = [
+                item.get("claim_id")
+                for item in self.source_claims.get("claims", [])
+                if item.get("source_type") == "FIXTURE"
+            ]
+            if fixture_claims:
+                self.issues.append(
+                    CompileIssue("E_FIXTURE_SOURCE_IN_PRODUCTION", "source_claims.claims", f"replace fixture claims: {fixture_claims}")
+                )
+        config = self.graph.get("m6_config", {})
+        if config:
+            weights = config.get("component_weights", {})
+            values = [
+                weights.get("target_exposure_reasoning"),
+                weights.get("causal_transmission_reasoning"),
+            ]
+            if any(not isinstance(value, (int, float)) or value < 0 for value in values) or sum(value for value in values if isinstance(value, (int, float))) <= 0:
+                self.issues.append(CompileIssue("E_M6_COMPONENT_WEIGHTS", "graph.m6_config.component_weights", "two non-negative weights with positive sum required"))
+            stock_entities = {
+                entity_id
+                for node in nodes.values()
+                if node.get("scope") == "STOCK"
+                for entity_id in node.get("entity_ids", [])
+            }
+            unknown = set(config.get("required_entity_ids", [])) - stock_entities
+            if unknown:
+                self.issues.append(CompileIssue("E_M6_UNKNOWN_REQUIRED_ENTITY", "graph.m6_config.required_entity_ids", f"unknown stock entities: {sorted(unknown)}"))
+
+    def _validate_author_reviews(self) -> None:
+        reviews = self.graph.get("author_reviews")
+        if not isinstance(reviews, list):
+            self.issues.append(CompileIssue("E_AUTHOR_REVIEW_EVIDENCE", "graph.author_reviews", "review records are required"))
+            return
+        approved = [
+            item
+            for item in reviews
+            if isinstance(item, dict)
+            and item.get("decision") == "APPROVE"
+            and item.get("graph_version") == self.graph.get("graph_version")
+        ]
+        pass_ids = {item.get("review_pass_id") for item in approved if item.get("review_pass_id")}
+        reviewer_ids = {item.get("reviewer_id") for item in approved if item.get("reviewer_id")}
+        times: list[datetime] = []
+        for index, review in enumerate(approved):
+            parsed = _parse_datetime(
+                review.get("reviewed_at"),
+                field_path=f"graph.author_reviews[{index}].reviewed_at",
+                issues=self.issues,
+            )
+            if parsed is not None:
+                times.append(parsed)
+        independent_recheck = len(times) >= 2 and (max(times) - min(times)).total_seconds() >= 86400
+        if len(pass_ids) < 2 or not (len(reviewer_ids) >= 2 or independent_recheck):
+            self.issues.append(
+                CompileIssue(
+                    "E_AUTHOR_REVIEW_EVIDENCE",
+                    "graph.author_reviews",
+                    "two approval passes by distinct reviewers or at least 24 hours apart are required",
+                )
+            )
+
+    def _validate_alternative_groups(self, paths: dict[str, dict[str, Any]]) -> None:
+        groups: dict[str, list[dict[str, Any]]] = {}
+        for path in paths.values():
+            group_id = path.get("alternative_group_id")
+            if group_id:
+                groups.setdefault(group_id, []).append(path)
+        for group_id, members in groups.items():
+            target_sets = {tuple(sorted(path.get("target_entity_ids", []))) for path in members}
+            segment_counts = {len(path.get("required_semantic_segments", [])) for path in members}
+            if len(target_sets) > 1:
+                self.issues.append(CompileIssue("E_ALTERNATIVE_TARGET_MISMATCH", f"graph.paths[{group_id}]", "alternative paths must share targets"))
+            if len(segment_counts) > 1:
+                self.issues.append(CompileIssue("E_ALTERNATIVE_COMPLEXITY_MISMATCH", f"graph.paths[{group_id}]", "alternative paths must have equal required segment counts"))
 
     def _validate_claim_refs(
         self,
@@ -469,5 +616,3 @@ def compile_files(
         graph=load_json(graph_path),
     )
     return compiler.compile()
-
-

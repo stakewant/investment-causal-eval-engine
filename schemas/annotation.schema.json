@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/annotation.schema.json",
+  "title": "Human Causal Rationale Annotation",
+  "type": "object",
+  "required": ["schema_version", "sample_id", "split", "group", "text", "annotations", "reviewer_id"],
+  "additionalProperties": false,
+  "properties": {
+    "schema_version": {"const": "causal-annotation-v1"},
+    "sample_id": {"type": "string", "minLength": 1},
+    "split": {"enum": ["train", "validation", "test"]},
+    "group": {
+      "type": "object",
+      "required": ["user_id", "scenario_id"],
+      "additionalProperties": false,
+      "properties": {
+        "user_id": {"type": "string", "minLength": 1},
+        "scenario_id": {"type": "string", "minLength": 1}
+      }
+    },
+    "text": {"type": "string"},
+    "annotations": {
+      "type": "object",
+      "required": ["evidence", "relations"],
+      "additionalProperties": false,
+      "properties": {
+        "evidence": {"type": "array", "items": {"type": "object"}},
+        "relations": {"type": "array", "items": {"type": "object"}},
+        "m6_score": {"type": "number", "minimum": 1, "maximum": 5}
+      }
+    },
+    "reviewer_id": {"type": "string", "minLength": 1}
+  }
+}

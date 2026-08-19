@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/cached_candidates.schema.json",
+  "title": "Reproducible External Model Candidates",
+  "type": "object",
+  "required": ["format_version", "provider_version", "parser_context_hash", "evidence_candidates", "relation_candidates"],
+  "additionalProperties": false,
+  "properties": {
+    "format_version": {"const": "cached-candidates-v1"},
+    "provider_version": {"type": "string", "minLength": 1},
+    "parser_context_hash": {"type": "string", "pattern": "^sha256:[0-9a-f]{64}$"},
+    "evidence_candidates": {"type": "array", "items": {"type": "object"}},
+    "relation_candidates": {"type": "array", "items": {"type": "object"}}
+  }
+}

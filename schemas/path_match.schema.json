@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://stakewant.github.io/investment-causal-eval-engine/schemas/path_match.schema.json",
+  "title": "Semantic Segment Path Match",
+  "type": "object",
+  "required": ["path_id", "applicability", "status", "recognized_segment_ids", "missing_segment_ids", "recognized_node_ids", "recognized_edge_ids", "relation_evidence_ids", "industry_to_stock_link", "diagnostic_tags", "segment_coverage", "target_entity_ids"],
+  "additionalProperties": false,
+  "properties": {
+    "path_id": {"type": "string"},
+    "applicability": {"enum": ["APPLICABLE", "NOT_APPLICABLE"]},
+    "status": {"enum": ["COMPLETE", "PARTIAL", "WRONG_DIRECTION", "DISCONNECTED", "MISSING", "NOT_APPLICABLE"]},
+    "recognized_segment_ids": {"type": "array", "items": {"type": "string"}},
+    "missing_segment_ids": {"type": "array", "items": {"type": "string"}},
+    "recognized_node_ids": {"type": "array", "items": {"type": "string"}},
+    "recognized_edge_ids": {"type": "array", "items": {"type": "string"}},
+    "relation_evidence_ids": {"type": "array", "items": {"type": "string"}},
+    "industry_to_stock_link": {"enum": ["VALID", "WEAK", "INVALID", "MISSING"]},
+    "diagnostic_tags": {"type": "array", "items": {"type": "string"}},
+    "segment_coverage": {"type": "number", "minimum": 0, "maximum": 1},
+    "target_entity_ids": {"type": "array", "items": {"type": "string"}}
+  }
+}

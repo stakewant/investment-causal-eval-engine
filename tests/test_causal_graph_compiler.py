@@ -65,6 +65,12 @@ class GraphCompilerTest(unittest.TestCase):
 
         self.assert_issue("E_ROLE_NOT_ALLOWED", graph=graph)
 
+    def test_unknown_graph_entity_is_rejected(self) -> None:
+        graph = copy.deepcopy(self.graph)
+        graph["nodes"][0]["entity_ids"] = ["UNKNOWN-ENTITY"]
+
+        self.assert_issue("E_UNKNOWN_ENTITY", graph=graph)
+
     def test_more_than_four_required_segments_is_rejected(self) -> None:
         graph = copy.deepcopy(self.graph)
         graph["paths"][0]["required_semantic_segments"].append(
@@ -79,6 +85,46 @@ class GraphCompilerTest(unittest.TestCase):
 
         self.assert_issue("E_POST_TURN_FUTURE_INFO", claims=claims)
 
+    def test_post_turn_feedback_claim_must_allow_feedback_use(self) -> None:
+        claims = copy.deepcopy(self.claims)
+        claims["claims"][0]["allowed_uses"].remove("POST_TURN_FEEDBACK")
+
+        self.assert_issue("E_FEEDBACK_USE_NOT_ALLOWED", claims=claims)
+
+    def test_required_edge_cannot_be_expired_at_cutoff(self) -> None:
+        graph = copy.deepcopy(self.graph)
+        graph["edges"][0]["valid_to"] = "2024-02-21T00:00:00+09:00"
+
+        self.assert_issue("E_EDGE_EXPIRED", graph=graph)
+
+    def test_invalid_m6_component_weights_are_rejected(self) -> None:
+        graph = copy.deepcopy(self.graph)
+        graph["m6_config"]["component_weights"] = {
+            "target_exposure_reasoning": 0,
+            "causal_transmission_reasoning": 0,
+        }
+
+        self.assert_issue("E_M6_COMPONENT_WEIGHTS", graph=graph)
+
+    def test_non_fixture_graph_requires_author_verification(self) -> None:
+        graph = copy.deepcopy(self.graph)
+        graph["fixture_only"] = False
+
+        self.assert_issue("E_AUTHOR_REVIEW_REQUIRED", graph=graph)
+
+    def test_verified_graph_requires_review_records(self) -> None:
+        graph = copy.deepcopy(self.graph)
+        graph["fixture_only"] = False
+        graph["complexity_profile"]["author_review_status"] = "VERIFIED"
+
+        self.assert_issue("E_AUTHOR_REVIEW_EVIDENCE", graph=graph)
+
+    def test_fixture_claims_cannot_enter_non_fixture_bundle(self) -> None:
+        graph = copy.deepcopy(self.graph)
+        graph["fixture_only"] = False
+
+        self.assert_issue("E_FIXTURE_SOURCE_IN_PRODUCTION", graph=graph)
+
     def test_hidden_mandatory_claim_requires_approved_prior_knowledge(self) -> None:
         claims = copy.deepcopy(self.claims)
         claims["claims"][0]["visibility_status"] = "NOT_VISIBLE_TO_USER"
@@ -87,7 +133,7 @@ class GraphCompilerTest(unittest.TestCase):
 
     def test_all_schema_documents_are_valid_json(self) -> None:
         schema_paths = sorted((ROOT / "schemas").glob("*.schema.json"))
-        self.assertEqual(len(schema_paths), 6)
+        self.assertGreaterEqual(len(schema_paths), 11)
         for schema_path in schema_paths:
             schema = self._load(schema_path)
             self.assertEqual(schema["$schema"], "https://json-schema.org/draft/2020-12/schema")
@@ -96,5 +142,3 @@ class GraphCompilerTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
-

@@ -9,6 +9,21 @@
   "source_policy_version": "temporal-source-v1.1",
   "graph_version": "semiconductor-fixture-turn2-graph-v1",
   "fixture_only": true,
+  "m6_config": {
+    "component_weights": {
+      "target_exposure_reasoning": 0.5,
+      "causal_transmission_reasoning": 0.5
+    },
+    "path_class_weights": {
+      "DIRECT": 0.5,
+      "INDIRECT": 1.0,
+      "PARALLEL": 0.25,
+      "MODIFIER": 0.25
+    },
+    "required_entity_ids": [],
+    "require_largest_trade_explanation": false,
+    "max_assets": 3
+  },
   "nodes": [
     {
       "node_id": "N-AI-CAPEX",
@@ -153,5 +168,3 @@
     "author_review_status": "DRAFT"
   }
 }
-
-
